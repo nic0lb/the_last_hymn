@@ -244,7 +244,7 @@ body.photo #dlg{display:none}
 <div id="card"></div>
 
 <div id="title">
-  <h1>Prova de Amor Maior</h1>
+  <h1>O Último Movimento</h1>
   <p class="by">por Nicolas Benicio</p>
   <p class="q">Não há prova de amor maior do que dar a própria vida pelo irmão. Mova a luz com o cursor.</p>
   <div class="menu"><button class="start" id="continueBtn" hidden>Continuar</button><button class="start" id="startBtn">Novo Jogo</button></div>
@@ -389,20 +389,126 @@ const LEVELS_CONFIG = [
          [10,'Acenda os três altares para conter a escuridão. Cada um custa 22% de vida.']]}
 ];
 
-const SOUL_POOL=[
- ['Ansel','Esperei tanto que esqueci a cor da luz. Leve a minha vigília: é pequena, mas é sua.'],
- ['Mirelle','Eu cantava para as paredes. Agora canto para você. Caminhe, eu seguro a sua sombra.'],
- ['Odo','Fui soldado. Ninguém nunca me pagou com algo que pesasse tão pouco e valesse tanto.'],
- ['Bento','Você gastou a sua chama por um desconhecido. Ela cresce quando é dada.'],
- ['Clara','Eu já não lembrava o meu nome. Obrigada por perguntar.'],
- ['Tomé','Duvidei até do escuro. Mas a sua luz era real.'],
- ['Lúcia','Não me deixe sozinha aqui. Ah, você não vai. Eu vejo.'],
- ['Davi','Cada passo seu acende um passo meu.'],
- ['Marta','Há quanto tempo? Não importa. Estou indo com você.'],
- ['Elias','Segure firme: o caminho é mais escuro à frente.'],
- ['Rute','Eu fiquei porque ninguém voltou. Você voltou.'],
- ['Gaspar','Leve-me. Aprendi a ser pequeno e ainda assim brilhar.']
-];
+/* ---------- SOULS_DATA: almas sacras dos 15 atos ----------
+   act{N}.name / title / quote  → a alma de destaque do ato (a primeira a ser libertada na ordem do mapa).
+   act{N}.companions            → as demais almas do mesmo ato, na mesma estrutura.
+   Total de almas por ato = 1 + companions.length e bate com `souls` de LEVELS_CONFIG:
+   3,3,4,4,(chefe),4,5,5,6,(chefe),5,6,6,7,(chefe).
+   Atos de chefe (5, 10 e 15) têm só o intercessor: sua voz aparece como invocação durante a luta.
+   As frases são epitáfios originais, inspirados na vida de cada santo; não são citações literais,
+   exceto onde a tradição já consagra a fórmula (Santo Agostinho, medalha de São Bento, Jo 20,29). */
+const SOULS_DATA = {
+  act1:{ name:"Santo Antônio", title:"O Farol dos Perdidos",
+    quote:"Tudo o que se perde ainda tem quem o procure. Você também foi procurado: é por isso que a luz chegou até aqui.",
+    companions:[
+      { name:"Santa Luzia", title:"A Guardiã da Luz", quote:"Meu nome é luz, e eu a levo nos olhos de quem acredita. Mantenha-os abertos, mesmo quando o escuro insistir." },
+      { name:"São Francisco de Assis", title:"O Irmão de Todas as Criaturas", quote:"Até a sombra é criatura e também pede um irmão. Comece chamando-a pelo nome." }
+    ] },
+  act2:{ name:"Santa Cecília", title:"A Voz do Hino Escondido",
+    quote:"Cantei no coração enquanto o mundo ensurdecia. O eco que volta é só o hino esperando por você.",
+    companions:[
+      { name:"São João Batista", title:"A Voz no Deserto", quote:"Eu fui apenas voz; a luz vinha depois de mim. Chame no deserto: alguém vai ouvir." },
+      { name:"Santa Teresinha do Menino Jesus", title:"A Pequena Via", quote:"Nenhum gesto é pequeno quando nasce do amor. Até um passo no escuro pode ser um hino." }
+    ] },
+  act3:{ name:"São Bruno", title:"O Silêncio que Guarda",
+    quote:"Nas paredes estreitas aprendi que o infinito cabe num coração obediente. Passe com cuidado: cada passo ensina.",
+    companions:[
+      { name:"Santa Clara de Assis", title:"A Lâmpada da Clausura", quote:"Atrás das grades também se acende uma luz que nenhuma parede prende. Leve a minha e atravesse." },
+      { name:"São Bernardo de Claraval", title:"O Mel e a Pedra", quote:"Entre pedras frias, é a ternura que mantém o caminho de pé. Siga com doçura e sem pressa." },
+      { name:"Santa Escolástica", title:"A Irmã que Pediu Mais uma Noite", quote:"Dizem que pedi mais uma noite com meu irmão, e o céu fechou as portas com a chuva. O amor sempre encontra um jeito de ficar." }
+    ] },
+  act4:{ name:"Santa Mônica", title:"As Lágrimas que Rezam",
+    quote:"Chorei anos a fio por um filho que parecia perdido. Nenhuma lágrima dada por amor cai no vazio.",
+    companions:[
+      { name:"São Camilo de Lellis", title:"As Mãos dos que Cuidam", quote:"Respire fundo: o ar pesa, mas o amor ainda cabe nele. Quem cuida do outro nunca respira sozinho." },
+      { name:"Santa Rita de Cássia", title:"A Rosa entre os Espinhos", quote:"Uma rosa floresceu no meio do inverno porque alguém pediu o impossível com fé. Suspirar também é rezar." },
+      { name:"São Vicente de Paulo", title:"O Pai dos Pobres", quote:"Todo suspiro é o pedido de alguém a quem ninguém respondeu. Responda." }
+    ] },
+  act5:{ name:"São Miguel Arcanjo", title:"O Príncipe da Luz",
+    quote:"Quem como Deus? Enquanto uma chama arder no seu peito, nenhum guardião da noite é invencível.",
+    companions:[] },
+  act6:{ name:"São Paulo", title:"O Cego que Viu",
+    quote:"Caí do cavalo e o dia virou noite. Foi no escuro que me encontrei. Levante-se: a luz vai achar o seu centro.",
+    companions:[
+      { name:"Santo Inácio de Loyola", title:"O Soldado que Aprendeu a Discernir", quote:"Uma bala de canhão me derrubou, e foi o chão que me ensinou a escolher a luz. Examine cada voz antes de segui-la." },
+      { name:"Santa Maria Madalena", title:"A Primeira Testemunha da Aurora", quote:"Fui a primeira a chegar ao túmulo no escuro e a primeira a ver o amanhecer. Quem não abandona a noite encontra a manhã." },
+      { name:"São Mateus", title:"O Chamado da Mesa de Impostos", quote:"Bastou uma palavra para mudar o meu centro: «Segue-me». Levante-se também, sem olhar o balcão." }
+    ] },
+  act7:{ name:"Santo Elói", title:"O Ferreiro de Deus",
+    quote:"Forjei ouro e ferro, mas só o amor dá forma ao coração. Deixe a forja dos dias queimar o que é inútil.",
+    companions:[
+      { name:"São Lourenço", title:"O Tesouro nos Pobres", quote:"Sobre a grelha em brasa mostrei o meu tesouro: os pobres de Deus. Quem se entrega ao fogo por amor não é consumido, é purificado." },
+      { name:"São Policarpo", title:"O Fiel até a Chama", quote:"Servi oitenta e seis anos e nunca fui traído por quem me amou. Que a chama me levasse: eu já era dela." },
+      { name:"Santa Bárbara", title:"A Torre e o Relâmpago", quote:"Fecharam-me numa torre, mas a fé tinha janela. Nenhuma sombra apaga o céu que se carrega por dentro." },
+      { name:"São Florião", title:"O que Apagou os Incêndios", quote:"Apaguei fogos para que outros vivessem. A escuridão queima; a luz, bem cuidada, apenas aquece." }
+    ] },
+  act8:{ name:"São Tomé", title:"O Buscador da Chama",
+    quote:"Quis tocar as chagas antes de crer, e o amor não me negou a prova. Crer na luz mesmo sem vê-la é a bem-aventurança que lhe deixo.",
+    companions:[
+      { name:"Santa Teresa de Calcutá", title:"A Luz sem Consolo", quote:"Passei décadas sem sentir a presença a quem servia, e servi do mesmo jeito. A fé também caminha no escuro, de mãos dadas com a dúvida." },
+      { name:"São João da Cruz", title:"A Noite Escura", quote:"A noite escura não é castigo: é a estrada onde a alma aprende a amar sem ver. Atravesse-a em silêncio." },
+      { name:"Santa Teresa de Ávila", title:"A que Rezou na Aridez", quote:"Rezei anos sem consolo algum e perseverei. A dúvida passa; o amor fica." },
+      { name:"São Judas Tadeu", title:"O Amigo das Causas Perdidas", quote:"Quando já não há esperança, ainda há quem peça por você. Nenhuma causa está perdida onde alguém continua a amar." }
+    ] },
+  act9:{ name:"Santo Antão do Deserto", title:"O Pai do Silêncio",
+    quote:"No deserto aprendi que o silêncio não é vazio: é um chamado. Escute, a luz também fala baixo.",
+    companions:[
+      { name:"São Charbel Makhlouf", title:"O Eremita do Líbano", quote:"Vivi escondido para que a luz fosse inteira. O que se entrega em segredo não precisa de testemunhas." },
+      { name:"São Pio de Pietrelcina", title:"As Chagas que Não Falam", quote:"Carreguei a dor calado, porque o amor não se explica: dá-se. Cale-se também, e doe." },
+      { name:"São Charles de Foucauld", title:"O Irmão Universal", quote:"Quis ser irmão de todos, até de quem não me conhecia. No silêncio do deserto, só o amor atravessa a distância." },
+      { name:"Santa Maria Goretti", title:"O Perdão em Silêncio", quote:"Perdoei antes de morrer, e o perdão calou mais fundo que qualquer grito. Não carregue ódio: pesa mais que a escuridão." },
+      { name:"São Serafim de Sarov", title:"A Alegria do Eremita", quote:"Na floresta mais calada ainda se canta por dentro. A paz que você guarda acende outras luzes sem ruído." }
+    ] },
+  act10:{ name:"Santo Agostinho", title:"O Coração Inquieto",
+    quote:"Inquieto está o nosso coração até que descanse em Ti. Entre tantas ilusões, só uma luz é verdadeira: a que não precisa de sombra para ser vista.",
+    companions:[] },
+  act11:{ name:"São Maximiliano Kolbe", title:"O que Tomou o Lugar de Outro",
+    quote:"Pedi para entrar na cela da fome no lugar de um desconhecido, e o abismo virou altar. Ninguém tem amor maior do que este.",
+    companions:[
+      { name:"Santo Estêvão", title:"O Primeiro a Ver o Céu Aberto", quote:"Entre as pedras vi o céu se abrir e perdoei quem me feria. A agonia é só a última porta antes da luz." },
+      { name:"Santa Perpétua e Santa Felicidade", title:"As Irmãs de Cartago", quote:"Entramos na arena de mãos dadas, e o medo ficou para trás. O que se vive junto não é destruído pela dor." },
+      { name:"Santa Inês", title:"A Cordeira Corajosa", quote:"Era tão jovem e tão certa que nenhuma ameaça me dobrou. A coragem não grita: permanece." },
+      { name:"São Damião de Molokai", title:"O Pastor dos Leprosos", quote:"Entrei na ilha dos abandonados e fiquei até ser um deles. O ninho da agonia só se desfaz quando alguém ousa ficar." }
+    ] },
+  act12:{ name:"São Tomás Moro", title:"O Homem de Consciência Inteira",
+    quote:"Servi o rei, mas a Deus primeiro. Há espinhos que coroam quem não negocia a verdade.",
+    companions:[
+      { name:"Santa Joana d'Arc", title:"A Donzela das Vozes", quote:"Ouvi vozes na aldeia e segui até a fogueira sem soltar a bandeira. Quem avança por fé não anda só." },
+      { name:"São Martinho de Tours", title:"O Manto Partilhado", quote:"Dei metade do meu manto a um pobre, e à noite vi que era Cristo quem o vestia. No escuro, reparta." },
+      { name:"São Jorge", title:"O Cavaleiro do Dragão", quote:"Coragem não é não ter medo do dragão: é montar mesmo assim. O corredor não acaba para quem recua." },
+      { name:"São Cristóvão", title:"O que Carregou o Menino", quote:"Atravessei o rio com o mundo nos ombros, e o peso crescia a cada passo. Todo irmão carregado encurta o caminho." },
+      { name:"Santa Catarina de Alexandria", title:"A Sabedoria que Resiste", quote:"Debati com os sábios, e nenhuma roda dobrou a minha fé. Em espaço apertado, a mente firme é o maior espaço." }
+    ] },
+  act13:{ name:"São Bento", title:"O Escudo do Altar",
+    quote:"A Santa Cruz seja a minha luz; que o dragão não seja o meu guia. Retira-te, sombra: este altar pertence à luz.",
+    companions:[
+      { name:"São Maurício", title:"O Capitão que Não Recuou", quote:"Mandaram-me erguer a espada contra inocentes, e baixei as armas. Há derrotas que são a mais alta vitória." },
+      { name:"São Longuinho", title:"O Soldado ao Pé da Cruz", quote:"Servi a lança e vi o Amor entregue. Os caídos não estão sós: a cruz os guarda." },
+      { name:"São Sebastião", title:"O Soldado Flechado", quote:"As flechas me atravessaram e ainda assim me levantei para servir. Quem cai por amor não cai: semeia." },
+      { name:"Santo Expedito", title:"A Pressa da Fé", quote:"«Amanhã» é a palavra do corvo; a fé diz «hoje». O que é urgente é amar agora." },
+      { name:"São Rafael Arcanjo", title:"O Companheiro de Viagem", quote:"Caminhei com Tobias sem ser reconhecido e levei a cura onde havia noite. Nenhum caído caminha sem companhia." }
+    ] },
+  act14:{ name:"São Pedro", title:"O Guardião das Chaves",
+    quote:"Neguei três vezes e três vezes fui perdoado. A porta se abre para quem volta, não para quem nunca caiu.",
+    companions:[
+      { name:"São Dimas", title:"O Ladrão que Entrou no Paraíso", quote:"No último instante pedi para ser lembrado e ouvi: «Hoje estarás comigo». Nenhum portal está fechado para quem pede com amor." },
+      { name:"São José", title:"O Patrono da Boa Morte", quote:"Parti amparado por Jesus e Maria. Quem atravessa o vazio com amor não o atravessa sozinho." },
+      { name:"São Lázaro de Betânia", title:"O que Voltou do Sepulcro", quote:"Eu já estava no vazio quando uma voz me chamou pelo nome. A morte não tem a última palavra: o amor tem." },
+      { name:"Santa Teresa Benedita da Cruz", title:"Edith Stein, a Filósofa Mártir", quote:"Busquei a verdade e encontrei a Cruz. Segui o meu povo até o fim sem soltar a luz que me guiava." },
+      { name:"Santa Faustina Kowalska", title:"A Secretária da Misericórdia", quote:"«Jesus, eu confio em Vós»: é a última coisa que se diz diante do vazio, e a primeira que o enche." },
+      { name:"São João Paulo II", title:"O Peregrino sem Medo", quote:"«Não tenhais medo»: abri as portas, e nenhum vazio as fechou. Atravessem; a luz vai à frente." }
+    ] },
+  act15:{ name:"São João Evangelista", title:"O Discípulo ao Pé da Cruz", altar:"Altar da Cruz de Luz",
+    quote:"Estive ao pé da cruz e vi o amor que escrevi tornar-se carne. Dê a vida pelo irmão: é isso, a luz.",
+    companions:[] }
+};
+
+/* Alma k (0 = destaque; 1.. = companheiras) do ato de id `actId` (1..15). Nunca devolve undefined. */
+function soulFor(actId,k){
+  const a=SOULS_DATA['act'+actId]; if(!a) return {name:'Uma alma',title:'',quote:''};
+  return k<=0?a:(a.companions[k-1]||a.companions[a.companions.length-1]||a);
+}
+
 
 function mulberry(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 
@@ -457,7 +563,7 @@ function genNormal(cfg,i){
   const others=rooms.map((_,k)=>k).filter(k=>k!==start);
   const shuffle=a=>{ for(let k=a.length-1;k>0;k--){ const j=Math.floor(R()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; };
   const souls=[], order=shuffle(others.slice());
-  for(let k=0;k<cfg.souls;k++){ const rm=rooms[order[k%order.length]], p=spot(rm), sp=SOUL_POOL[(i*5+k)%SOUL_POOL.length]; souls.push([p[0],p[1],sp[0],sp[1]]); }
+  for(let k=0;k<cfg.souls;k++){ const rm=rooms[order[k%order.length]], p=spot(rm), sp=soulFor(cfg.id,k); souls.push([p[0],p[1],sp.name,sp.quote,sp.title]); }
   const KEY={espectro:'e',stalker:'s',leech:'l',guardian:'g'};
   const far=others.filter(k=>dist(rooms[k].cx,rooms[k].cy,S0.cx,S0.cy)>=14), pool=far.length?far:others, enemies=[];
   for(const t in cfg.enemies) for(let k=0;k<cfg.enemies[t];k++){ const rm=rooms[pool[Math.floor(R()*pool.length)]], p=spot(rm); enemies.push([p[0],p[1],KEY[t]]); }
@@ -1164,7 +1270,7 @@ function buildLevel(i){
   const altars=d.altars.map(([x,y])=>Object.assign(C(x,y),{cost:ALTAR_COST,charge:0,lit:false,holy:false,reserve:0,seed:Math.random()*9}))
     .concat(d.holy.map(([x,y])=>Object.assign(C(x,y),{cost:0,charge:0,lit:true,holy:true,reserve:45,seed:Math.random()*9})));
   L={ g,w:d.w,h:d.h,rnd,gates,veils,altars,
-    souls:d.souls.map(([x,y,name,line])=>Object.assign(C(x,y),{name,line,cost:SOUL_COST,charge:0,freed:false,ph:Math.random()*6})),
+    souls:d.souls.map(([x,y,name,line,title])=>Object.assign(C(x,y),{name,line,title:title||'',cost:SOUL_COST,charge:0,freed:false,ph:Math.random()*6})),
     orbs:d.orbs.map(([x,y])=>Object.assign(C(x,y),{val:d.orbVal,ph:rand(0,6),taken:false})),
     shades:d.shades.map(([x,y,t])=>mkEnemy((x+.5)*T,(y+.5)*T,t)),
     lamps:d.lamps.map(([x,y])=>Object.assign(C(x,y),{ph:rand(0,6)})),
@@ -1174,6 +1280,7 @@ function buildLevel(i){
     boss:d.boss?mkBoss(d.boss,C(d.bossAt[0],d.bossAt[1])):null,
     relics:rel.list, secMap:rel.sec, followers:[], freed:0, time:0, hints:d.hints.map(h=>h.slice()), flags:{}, veilCd:0, ambient:d.ambient, def:d,
     need:d.need||0, blackout:false, way:[] };
+  if(d.boss){ const sd=SOULS_DATA['act'+d.id]; if(sd){ L.hints.push([4.5,`<b>${sd.name} · ${sd.title}</b>“${sd.quote}”`]); L.hints.sort((a,b)=>a[0]-b[0]); } }
   if(L.brother) L.way=[{x:L.brother.x+2*T,y:L.brother.y},{x:L.exit.x-2*T,y:L.exit.y},{x:L.exit.x,y:L.exit.y}];
   if(L.brother){ L.brother.x0=L.brother.x; L.brother.y0=L.brother.y; }
   Object.assign(L,Lore.place(i,d));
@@ -1312,13 +1419,13 @@ function completeInteract(it){
     if(!L.def.boss) SaveSystem.cp=L.altars.indexOf(o);
     SaveSystem.save();
     sfx.altar(); ring(o.x,o.y,8,150,.9,COL_EMBER,4); burst(o.x,o.y-6,26,COL_GOLD,140); S.shake=Math.max(S.shake,5);
-    if(!L.flags.altar){ L.flags.altar=1; say('A chama aceita o que foi dado. Ao lado dela você pode descansar, mas só um pouco.',6500); }
+    if(!L.flags.altar){ L.flags.altar=1; const sd=SOULS_DATA['act'+L.def.id]; say(`<b>${sd?(sd.altar||'Altar de '+sd.name):'Altar'}</b>A chama aceita o que foi dado. Ao lado dela você pode descansar, mas só um pouco.`,6500); }
   }else if(it.type==='torch'){
     o.lit=true; o.charge=o.cost; if(L.boss&&L.boss.type==='b1') L.boss.snuffAuto=Math.max(L.boss.snuffAuto,6); sfx.orb(); ring(o.x,o.y,8,110,.6,COL_EMBER,3); burst(o.x,o.y-6,16,COL_GOLD,110); SaveSystem.save();
   }else if(it.type==='soul'){
     o.freed=true; L.freed++; if(L.followers.length<8) L.followers.push({x:o.x,y:o.y,ph:rand(0,6),rise:0});
     sfx.choir(); ring(o.x,o.y,8,160,1.1,COL_GHOST,4); burst(o.x,o.y,30,COL_GHOST,150); SaveSystem.save();
-    say(`<b>${o.name}</b>“${o.line}”`,8200);
+    say(`<b>${o.name}${o.title?' · '+o.title:''}</b>“${o.line}”`,8200);
     setTimeout(()=>{ if(S.mode==='play'&&L&&!L.flags.bless){ L.flags.bless=1; say('Bênção recebida: a vida volta a você, devagar, e sua luz alcança mais longe.',5200); } },8500);
   }
 }
